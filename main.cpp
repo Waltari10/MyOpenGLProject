@@ -2,45 +2,66 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
-#include <gl/freeglut.h>
+#include <SDL.h>
+#include <stdio.h>
 
 using namespace std;
 
-string name;
-int height;
-int width;
-float weight;
+int SCREEN_WIDTH;
+int SCREEN_HEIGHT;
 
 void loadFromFile(string fileName) {
 	ifstream t(fileName);
 
-	t >> width;
-	t >> height;
-	t >> name;
-	t >> weight;
+	t >> SCREEN_WIDTH;
+	t >> SCREEN_HEIGHT;
 
 }
 
-void display(void)
+
+int main(int argc, char* args[])
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glutSolidTeapot(.5);
-	glFlush();
-}
+	loadFromFile("preferences.txt");
+	//The window we'll be rendering to
+	SDL_Window* window = NULL;
 
-int main(int argc, char** argv)
-{
-	glutInit(&argc, argv);
+	//The surface contained by the window
+	SDL_Surface* screenSurface = NULL;
 
-	glutInitDisplayMode(GLUT_SINGLE);
-	glutInitDisplayMode(GLUT_RGB);
+	//Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+	}
+	else
+	{
+		//Create window
+		window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (window == NULL)
+		{
+			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+		}
+		else
+		{
+			//Get window surface
+			screenSurface = SDL_GetWindowSurface(window);
 
-	glutInitWindowSize(300, 300);
-	glutInitWindowPosition(100, 100);
-	glutCreateWindow("HelloTeapot");
+			//Fill the surface white
+			SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
 
-	glutDisplayFunc(display);
+			//Update the surface
+			SDL_UpdateWindowSurface(window);
 
-	glutMainLoop();
+			//Wait two seconds
+			SDL_Delay(2000);
+		}
+	}
+
+	//Destroy window
+	SDL_DestroyWindow(window);
+
+	//Quit SDL subsystems
+	SDL_Quit();
+
 	return 0;
 }
